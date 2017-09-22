@@ -611,6 +611,11 @@ echo "cd $Origin" > /home/$User/startup.sh
 cat $Origin/startup.sh >> /home/$User/startup.sh
 chmod +x /home/$User/startup.sh
 
+cp $Origin/leftarc_2Mic /home/$User/leftarc_2Mic
+echo "cd $Origin" > /home/$User/2Mic_startup.sh
+cat $Origin/2Mic_startup.sh >> /home/$User/2Mic_startup.sh
+chmod +x /home/$User/2Mic_startup.sh
+
 echo ""
 echo '============================='
 echo '*****************************'
@@ -623,7 +628,7 @@ Number_Terminals=4
 if [ "$Wake_Word_Detection_Enabled" = "true" ]; then
   Number_Terminals=5
 fi
-echo "To run the demo, do the following in $Number_Terminals seperate terminals:"
+echo "To run the demo, do the following in $Number_Terminals separate terminals:"
 echo "Run the companion service: cd $Companion_Service_Loc && npm start"
 echo "Run the AVS Java Client: cd $Java_Client_Loc && mvn exec:exec"
 echo "Run the Recording Agent: cd $Recording_Agent_Loc && ./run.sh"
@@ -635,3 +640,4 @@ if [ "$Wake_Word_Detection_Enabled" = "true" ]; then
   echo "  GPIO: PLEASE NOTE -- If using this option, run the wake word agent as sudo:"
   echo "  cd $Wake_Word_Agent_Loc/src && sudo ./wakeWordAgent -e gpio"
 fi
+echo "If running the 2-Mic demo, run the 2Mic_startup script: cd ~ && bash 2Mic_startup.sh"

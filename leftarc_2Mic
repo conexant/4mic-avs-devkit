@@ -1,0 +1,48 @@
+pcm.dsnoopy {
+  type dsnoop
+  ipc_key 1121
+  slave {
+    pcm "hw:1,0"
+    rate 16000
+    channels 2
+  }
+  bindings {
+    0 0
+    1 1
+  }
+}
+
+pcm.left {
+  type plug
+  slave {
+    pcm "dsnoopy"
+    channels 2
+  }
+  ttable.0.0 1
+}
+
+pcm.right {
+  type plug
+  slave {
+    pcm "dsnoopy"
+    channels 2
+  }
+  ttable.0.1 1
+}
+
+pcm.!default {
+  type asym
+  playback.pcm {
+    type plug
+    slave.pcm "hw:0,0"
+   }
+   capture.pcm {
+     type plug
+     slave.pcm "left"
+   }
+}
+
+ctl.!default {
+        type hw
+        card 0
+}
