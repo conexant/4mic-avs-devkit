@@ -17,24 +17,27 @@ import com.amazon.alexa.avs.message.request.context.AlertsStatePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class AlertManager implements AlertHandler {
+    private static final int MINUTES_AFTER_PAST_ALERT_EXPIRES = 30;
     private final AlertEventListener listener;
     private final AlertHandler handler;
     private final Map<String, AlertScheduler> schedulers;
     private final Set<String> activeAlerts;
-    private final AlertsDataStore dataStore;
+    private final DataStore<List<Alert>> dataStore;
 
     private static final Logger log = LoggerFactory.getLogger(AlertManager.class);
 
     public AlertManager(AlertEventListener listener, AlertHandler handler,
-            AlertsDataStore dataStore) {
+            DataStore<List<Alert>> dataStore) {
         this.listener = listener;
         this.handler = handler;
         this.schedulers = new HashMap<String, AlertScheduler>();
@@ -43,7 +46,38 @@ public class AlertManager implements AlertHandler {
     }
 
     void loadFromDisk(final ResultListener listener) {
-        dataStore.loadFromDisk(AlertManager.this, listener);
+        dataStore.loadFromDisk(new com.amazon.alexa.avs.DataStore.ResultListener<List<Alert>>() {
+
+            @Override
+            public void onSuccess(List<Alert> alerts) {
+                if (alerts != null) {
+                    List<Alert> droppedAlerts = new LinkedList<Alert>();
+                    for (Alert alert : alerts) {
+                        // Only add alerts that are within the expiration window
+                        if (alert.getScheduledTime().isAfter(ZonedDateTime
+                                .now()
+                                .minusMinutes(MINUTES_AFTER_PAST_ALERT_EXPIRES))) {
+                            add(alert, true);
+                        } else {
+                            droppedAlerts.add(alert);
+                        }
+                    }
+                    // Now that all the valid alerts have been re-added to the alarm
+                    // manager,
+                    // go through and explicitly drop all the alerts that were not added
+                    for (Alert alert : droppedAlerts) {
+                        drop(alert);
+                    }
+                }
+                listener.onSuccess();
+            }
+
+            @Override
+            public void onFailure() {
+                listener.onFailure();
+            }
+
+        });
 
     }
 
@@ -126,7 +160,19 @@ public class AlertManager implements AlertHandler {
     }
 
     private void writeCurrentAlertsToDisk(final ResultListener l) {
-        dataStore.writeToDisk(getAllAlerts(), l);
+        this.dataStore.writeToDisk(getAllAlerts(),
+                new com.amazon.alexa.avs.DataStore.ResultListener<List<Alert>>() {
+
+                    @Override
+                    public void onSuccess(List<Alert> p) {
+                        l.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        l.onFailure();
+                    }
+                });
     }
 
     @Override

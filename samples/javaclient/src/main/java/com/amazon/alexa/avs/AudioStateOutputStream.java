@@ -31,7 +31,7 @@ public class AudioStateOutputStream extends PipedOutputStream {
     private RecordingStateListener stateListener;
     private RecordingRMSListener rmsListener;
 
-    protected AudioStateOutputStream(PipedInputStream inputStream,
+    public AudioStateOutputStream(PipedInputStream inputStream,
             RecordingStateListener stateListener, final RecordingRMSListener rmsListener)
                     throws IOException {
         super(inputStream);

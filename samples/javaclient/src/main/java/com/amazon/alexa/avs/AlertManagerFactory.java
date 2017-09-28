@@ -12,10 +12,12 @@
  */
 package com.amazon.alexa.avs;
 
+import java.util.List;
+
 public class AlertManagerFactory {
 
     public AlertManager getAlertManager(AlertEventListener listener, AlertHandler handler,
-            AlertsDataStore dataStore) {
+            DataStore<List<Alert>> dataStore) {
         return new AlertManager(listener, handler, dataStore);
     }
 }

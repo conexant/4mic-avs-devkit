@@ -10,7 +10,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.amazon.alexa.avs.ui;
+package com.amazon.alexa.avs.ui.graphical;
+
+import static com.amazon.alexa.avs.ui.controllers.DeviceNameViewController.DEVICE_LABEL;
+import static com.amazon.alexa.avs.ui.controllers.DeviceNameViewController.DSN_LABEL;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -20,15 +23,15 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class DeviceNameView extends JPanel {
+import com.amazon.alexa.avs.ui.DeviceNameUIHandler;
 
-    private static final String DEVICE_LABEL = "Device: ";
-    private static final String DSN_LABEL = "DSN: ";
+public class GraphicalDeviceNameView extends JPanel implements DeviceNameUIHandler {
+
     private static final String DSN_LABEL_NAME = "dsnlabel";
     private static final String PRODUCTID_LABEL_NAME = "productIDlabel";
     private static final String DEVICE_NAME = "devicename";
 
-    public DeviceNameView(String productId, String dsn) {
+    GraphicalDeviceNameView(String productId, String dsn) {
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JLabel productIdLabel = new JLabel(productId);
         JLabel dsnLabel = new JLabel(dsn);

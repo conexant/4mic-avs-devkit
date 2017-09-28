@@ -48,11 +48,11 @@ public class RegCodeDisplayHandler {
                 } catch (Exception e) {
                     // Ignore and proceed
                 }
-                title = "Click OK after Registering/Authenticating Device";
+                title = "Registering/Authenticating Device";
                 dialogFactory.showInformationalDialog(title,
                     "If a browser window did not open, please copy and paste the below URL into a "
                         + "web browser, and follow the instructions:\n" + regUrl
-                        + "\n\n Click the OK button when finished.");
+                        + "\n\n Continue only once you've authenticated with AVS.");
             } else {
                 handleAuthenticationCopyToClipboard(title, regUrl);
             }
@@ -63,13 +63,14 @@ public class RegCodeDisplayHandler {
 
     private void handleAuthenticationCopyToClipboard(String title, String regUrl) {
         int selected =
-            dialogFactory.showYesNoDialog(title, "Please register your device by visiting the following URL in "
-                                + "a web browser and follow the instructions:\n" + regUrl
-                                + "\n\n Would you like the URL copied to your clipboard?");
+            dialogFactory.showYesNoDialog(title, "Please register your device by visiting "
+                    + "the following URL in a web browser and follow the instructions:\n" + regUrl
+                    + "\n\n Would you like the URL copied to your clipboard?");
         if (selected == JOptionPane.YES_OPTION) {
             copyToClipboard(regUrl);
         }
-        dialogFactory.showInformationalDialog(title, "Click the OK button once you've authenticated with AVS");
+        dialogFactory.showInformationalDialog(title, "Continue once you've authenticated "
+                + "with AVS");
     }
 
     private void copyToClipboard(String text) {

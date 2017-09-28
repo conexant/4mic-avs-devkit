@@ -1,13 +1,13 @@
-/** 
+/**
  * Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Amazon Software License (the "License"). You may not use this file 
+ * Licensed under the Amazon Software License (the "License"). You may not use this file
  * except in compliance with the License. A copy of the License is located at
  *
  *   http://aws.amazon.com/asl/
  *
- * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the 
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 
@@ -64,8 +64,8 @@ public final class AVSAPIConstants {
             }
 
             public static final class ProgressReportIntervalElapsed {
-                public static final String NAME = ProgressReportIntervalElapsed.class
-                        .getSimpleName();
+                public static final String NAME =
+                        ProgressReportIntervalElapsed.class.getSimpleName();
             }
 
             public static final class PlaybackState {
@@ -292,12 +292,48 @@ public final class AVSAPIConstants {
     }
 
     public static final class Settings {
-        public static final String NAMESPACE = "Settings";
+        public static final String NAMESPACE = Settings.class.getSimpleName();
 
         public static final class Events {
 
             public static final class SettingsUpdated {
-                public static final String NAME = "SettingsUpdated";
+                public static final String NAME = SettingsUpdated.class.getSimpleName();
+            }
+        }
+    }
+
+    public static final class TemplateRuntime {
+        public static final String NAMESPACE = TemplateRuntime.class.getSimpleName();
+
+        public static final class Directives {
+            public static final class RenderTemplate {
+                public static final String NAME = RenderTemplate.class.getSimpleName();
+            }
+
+            public static final class RenderPlayerInfo {
+                public static final String NAME = RenderPlayerInfo.class.getSimpleName();
+            }
+        }
+    }
+
+    public static final class Notifications {
+        public static final String NAMESPACE = Notifications.class.getSimpleName();
+
+        public static final class Events {
+
+            public static final class IndicatorState {
+                public static final String NAME = IndicatorState.class.getSimpleName();
+            }
+        }
+
+        public static final class Directives {
+
+            public static final class SetIndicator {
+                public static final String NAME = SetIndicator.class.getSimpleName();
+            }
+
+            public static final class ClearIndicator {
+                public static final String NAME = ClearIndicator.class.getSimpleName();
             }
         }
     }

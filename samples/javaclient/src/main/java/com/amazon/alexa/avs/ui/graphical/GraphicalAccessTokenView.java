@@ -10,7 +10,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.amazon.alexa.avs.ui;
+package com.amazon.alexa.avs.ui.graphical;
+
+import static com.amazon.alexa.avs.ui.controllers.AccessTokenViewController.ACCESS_TOKEN_LABEL;
+
+import com.amazon.alexa.avs.AVSController;
+import com.amazon.alexa.avs.auth.AuthSetup;
 
 import java.awt.GridLayout;
 
@@ -19,20 +24,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.amazon.alexa.avs.AVSController;
-import com.amazon.alexa.avs.auth.AccessTokenListener;
-import com.amazon.alexa.avs.auth.AuthSetup;
+import com.amazon.alexa.avs.ui.AccessTokenUIHandler;
 
-public class BearerTokenView extends JPanel implements AccessTokenListener {
+public class GraphicalAccessTokenView extends JPanel implements AccessTokenUIHandler {
 
-    private static final String BEARER_TOKEN_LABEL = "Bearer token:";
     private static final int TEXT_FIELD_COLUMNS = 50;
 
     private JTextField tokenTextField;
 
-    public BearerTokenView(AuthSetup authSetup, AVSController controller) {
+    GraphicalAccessTokenView(AuthSetup authSetup, AVSController controller) {
         super(new GridLayout(0, 1));
-        this.add(new JLabel(BEARER_TOKEN_LABEL));
+        this.add(new JLabel(ACCESS_TOKEN_LABEL));
 
         tokenTextField = new JTextField(TEXT_FIELD_COLUMNS);
         tokenTextField.addActionListener(e -> {
@@ -45,5 +47,10 @@ public class BearerTokenView extends JPanel implements AccessTokenListener {
     @Override
     public synchronized void onAccessTokenReceived(String accessToken) {
         SwingUtilities.invokeLater(() -> tokenTextField.setText(accessToken));
+    }
+
+    @Override
+    public synchronized void onAccessTokenRevoked() {
+        SwingUtilities.invokeLater(() -> tokenTextField.setText(""));
     }
 }

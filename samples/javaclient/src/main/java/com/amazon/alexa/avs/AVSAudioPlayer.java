@@ -126,6 +126,8 @@ public class AVSAudioPlayer {
 
     private volatile SpeechState speechState = SpeechState.FINISHED;
 
+    private boolean isInterrupted = false;
+
     private boolean currentlyMuted;
 
     public AVSAudioPlayer(AVSController controller) {
@@ -173,6 +175,8 @@ public class AVSAudioPlayer {
         AudioItem item = play.getAudioItem();
         if (play.getPlayBehavior() == Play.PlayBehavior.REPLACE_ALL) {
             clearAll();
+            // if already playing, transition to stopped and send PlaybackStopped event
+            audioPlayerStateMachine.playReplaceAll();
         } else if (play.getPlayBehavior() == Play.PlayBehavior.REPLACE_ENQUEUED) {
             clearEnqueued();
         }
@@ -213,11 +217,11 @@ public class AVSAudioPlayer {
 
     public void handleClearQueue(ClearQueue clearQueue) {
         if (clearQueue.getClearBehavior() == ClearQueue.ClearBehavior.CLEAR_ALL) {
-            audioPlayerStateMachine.clearQueueAll();
             clearAll();
+            audioPlayerStateMachine.clearQueueAll();
         } else {
-            audioPlayerStateMachine.clearQueueEnqueued();
             clearEnqueued();
+            audioPlayerStateMachine.clearQueueEnqueued();
         }
     }
 
@@ -319,6 +323,10 @@ public class AVSAudioPlayer {
 
                     audioPlayerStateMachine.playbackStarted();
                     startTimerAndProgressReporter();
+
+                    if (isInterrupted) {
+                        interruptContent();
+                    }
 
                     if (isPaused) {
                         audioPlayerStateMachine.playbackPaused();
@@ -431,7 +439,6 @@ public class AVSAudioPlayer {
 
     private boolean isPlaying() {
         return (audioPlayerStateMachine.getState() == AudioPlayerState.PLAYING
-                || audioPlayerStateMachine.getState() == AudioPlayerState.PAUSED
                 || audioPlayerStateMachine.getState() == AudioPlayerState.BUFFER_UNDERRUN);
     }
 
@@ -471,6 +478,7 @@ public class AVSAudioPlayer {
      * Interrupt only content
      */
     private void interruptContent() {
+        isInterrupted = true;
 
         synchronized (audioPlayer.getMediaPlayer()) {
             if (!playQueue.isEmpty() && isPlaying() && audioPlayer.getMediaPlayer().isPlaying()) {
@@ -506,6 +514,8 @@ public class AVSAudioPlayer {
      * Resume any content
      */
     private void resumeContent() {
+        isInterrupted = false;
+
         synchronized (audioPlayer.getMediaPlayer()) {
             if (!playQueue.isEmpty() && isPlayingOrPaused()
                     && !audioPlayer.getMediaPlayer().isPlaying()) {

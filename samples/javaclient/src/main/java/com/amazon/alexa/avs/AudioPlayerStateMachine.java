@@ -57,6 +57,7 @@ public class AudioPlayerStateMachine {
     private final PlaybackStopped playbackStopped;
     private final ClearQueueEnqueued clearQueueEnqueued;
     private final ClearQueueAll clearQueueAll;
+    private final PlayReplaceAll playReplaceAll;
     private final PlaybackPaused playbackPaused;
     private final PlaybackResumed playbackResumed;
 
@@ -69,6 +70,8 @@ public class AudioPlayerStateMachine {
                 audioPlayer, controller);
         clearQueueAll =
                 new ClearQueueAll(EnumSet.allOf(AudioPlayerState.class), audioPlayer, controller);
+        playReplaceAll =
+                new PlayReplaceAll(EnumSet.allOf(AudioPlayerState.class), audioPlayer, controller);
         playbackStarted = new PlaybackStarted(
                 EnumSet.of(AudioPlayerState.STOPPED, AudioPlayerState.FINISHED,
                         AudioPlayerState.IDLE, AudioPlayerState.PAUSED, AudioPlayerState.PLAYING),
@@ -142,6 +145,14 @@ public class AudioPlayerStateMachine {
     public synchronized void clearQueueAll() {
         log.debug(ClearQueueAll.class.getSimpleName());
         clearQueueAll.transition(state);
+    }
+
+    /**
+     * Transitions to stopped if currently playing, sending playback stopped event.
+     */
+    public synchronized void playReplaceAll() {
+        log.debug(PlayReplaceAll.class.getSimpleName());
+        playReplaceAll.transition(state);
     }
 
     /**
@@ -390,6 +401,25 @@ public class AudioPlayerStateMachine {
                         getCurrentStreamToken(), getCurrentOffsetInMilliseconds()));
             }
 
+        }
+    }
+
+    private static class PlayReplaceAll extends AudioPlayerStateTransition {
+
+        public PlayReplaceAll(Set<AudioPlayerState> validStartStates, AVSAudioPlayer audioPlayer,
+                              AVSController controller) {
+            super(validStartStates, audioPlayer, controller);
+        }
+
+        @Override
+        protected void onTransition(State<AudioPlayerState> state) {
+            AudioPlayerState currentState = state.get();
+            if (currentState == AudioPlayerState.PLAYING || currentState == AudioPlayerState.PAUSED
+                    || currentState == AudioPlayerState.BUFFER_UNDERRUN) {
+                state.set(AudioPlayerState.STOPPED);
+                sendRequest(RequestFactory.createAudioPlayerPlaybackStoppedEvent(
+                        getCurrentStreamToken(), getCurrentOffsetInMilliseconds()));
+            }
         }
     }
 

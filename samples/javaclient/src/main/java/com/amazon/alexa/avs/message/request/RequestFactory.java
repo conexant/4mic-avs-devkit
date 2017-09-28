@@ -12,9 +12,6 @@
  */
 package com.amazon.alexa.avs.message.request;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.amazon.alexa.avs.AVSAPIConstants;
 import com.amazon.alexa.avs.SpeechProfile;
 import com.amazon.alexa.avs.exception.DirectiveHandlingException.ExceptionType;
@@ -29,6 +26,7 @@ import com.amazon.alexa.avs.message.request.audioplayer.PlaybackFailedPayload.Er
 import com.amazon.alexa.avs.message.request.audioplayer.PlaybackStutterFinishedPayload;
 import com.amazon.alexa.avs.message.request.context.AlertsStatePayload;
 import com.amazon.alexa.avs.message.request.context.ComponentState;
+import com.amazon.alexa.avs.message.request.context.NotificationsStatePayload;
 import com.amazon.alexa.avs.message.request.context.PlaybackStatePayload;
 import com.amazon.alexa.avs.message.request.context.SpeechStatePayload;
 import com.amazon.alexa.avs.message.request.context.VolumeStatePayload;
@@ -38,6 +36,9 @@ import com.amazon.alexa.avs.message.request.speechrecognizer.SpeechRecognizerPay
 import com.amazon.alexa.avs.message.request.speechsynthesizer.SpeechLifecyclePayload;
 import com.amazon.alexa.avs.message.request.system.ExceptionEncounteredPayload;
 import com.amazon.alexa.avs.message.request.system.UserInactivityReportPayload;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class RequestFactory {
 
@@ -53,7 +54,7 @@ public class RequestFactory {
         Header header = new DialogRequestIdHeader(AVSAPIConstants.SpeechRecognizer.NAMESPACE,
                 AVSAPIConstants.SpeechRecognizer.Events.Recognize.NAME, dialogRequestId);
         Event event = new Event(header, payload);
-        return createRequestWithAllState(event, playerState, speechState, alertState, volumeState);
+        return createRequestWithStates(event, playerState, speechState, alertState, volumeState);
     }
 
     public static RequestBody createAudioPlayerPlaybackStartedEvent(String streamToken,
@@ -184,8 +185,7 @@ public class RequestFactory {
             AlertsStatePayload alertState, VolumeStatePayload volumeState) {
         Header header = new MessageIdHeader(AVSAPIConstants.PlaybackController.NAMESPACE, name);
         Event event = new Event(header, new Payload());
-        return createRequestWithAllState(event, playbackState, speechState, alertState,
-                volumeState);
+        return createRequestWithStates(event, playbackState, speechState, alertState, volumeState);
     }
 
     public static RequestBody createSpeechSynthesizerSpeechStartedEvent(String speakToken) {
@@ -265,11 +265,12 @@ public class RequestFactory {
 
     public static RequestBody createSystemSynchronizeStateEvent(PlaybackStatePayload playerState,
             SpeechStatePayload speechState, AlertsStatePayload alertState,
-            VolumeStatePayload volumeState) {
+            VolumeStatePayload volumeState, NotificationsStatePayload notificationsState) {
         Header header = new MessageIdHeader(AVSAPIConstants.System.NAMESPACE,
                 AVSAPIConstants.System.Events.SynchronizeState.NAME);
         Event event = new Event(header, new Payload());
-        return createRequestWithAllState(event, playerState, speechState, alertState, volumeState);
+        return createRequestWithStates(event, playerState, speechState, alertState, volumeState,
+                notificationsState);
     }
 
     public static RequestBody createSystemExceptionEncounteredEvent(String directiveJson,
@@ -282,8 +283,7 @@ public class RequestFactory {
         Event event =
                 new Event(header, new ExceptionEncounteredPayload(directiveJson, type, message));
 
-        return createRequestWithAllState(event, playbackState, speechState, alertState,
-                volumeState);
+        return createRequestWithStates(event, playbackState, speechState, alertState, volumeState);
     }
 
     public static RequestBody createSystemUserInactivityReportEvent(long inactiveTimeInSeconds) {
@@ -300,14 +300,11 @@ public class RequestFactory {
         return new RequestBody(event);
     }
 
-    private static RequestBody createRequestWithAllState(Event event,
-            PlaybackStatePayload playbackState, SpeechStatePayload speechState,
-            AlertsStatePayload alertState, VolumeStatePayload volumeState) {
-        List<ComponentState> context =
-                Arrays.asList(ComponentStateFactory.createPlaybackState(playbackState),
-                        ComponentStateFactory.createSpeechState(speechState),
-                        ComponentStateFactory.createAlertState(alertState),
-                        ComponentStateFactory.createVolumeState(volumeState));
+    private static RequestBody createRequestWithStates(Event event, Payload... payloads) {
+        List<ComponentState> context = new LinkedList<ComponentState>();
+        for (Payload p : payloads) {
+            context.add(ComponentStateFactory.createComponentState(p));
+        }
         return new ContextEventRequestBody(context, event);
     }
 }

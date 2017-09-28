@@ -53,6 +53,29 @@ app.get('/provision/accessToken', function (req, res) {
 });
 
 /**
+ * The endpoint for the device to revoke a token.
+ */
+app.get('/provision/revokeToken', function (req, res) {
+    if (!req.client.authorized) {
+        console.error("User is not authorized to access this URL. Make sure the client certificate is set up properly");
+        res.status(401);
+        res.send({ error: "Unauthorized", message: "You are not authorized to access this URL. Make sure your client certificate is set up properly." });
+        return;
+    }
+
+    auth.revokeToken(req.query.sessionId, function (err, reply) {
+        if (err) {
+            console.error("Error revoking token: " + err.name + ", " + err.message);
+            res.status(err.status);
+            res.send({ error: err.name, message: err.message });
+        } else {
+            console.log("Successfully revoked token for session id: " + req.query.sessionId);
+            res.send(reply);
+        }
+    });
+});
+
+/**
  * The endpoint for the customer to visit and get redirected to LWA to login.
  */
 app.get('/provision/:regCode', function (req, res, next) {

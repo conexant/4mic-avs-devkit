@@ -7,3 +7,5 @@
 01/13/2017 - Bug fixes, updated sound files, and more logging.
 01/30/2017 - Added support for SetEndpoint directive and SettingsUpdated event.
 04/20/2017 - Node.js service now persists auth state. Listen button updated with microphone icon. GUI code refactoring. Bug fixes for low volume and wake word agent.
+06/20/2017 - Logout support and headless capabilities added.
+07/06/2017 - Add support for notifications interface

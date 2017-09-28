@@ -149,7 +149,7 @@ public class CompanionServiceClient {
      *             If an I/O exception occurs.
      */
     public CompanionServiceRegCodeResponse getRegistrationCode() throws IOException {
-        Map<String, String> queryParameters = new HashMap<String, String>();
+        Map<String, String> queryParameters = new HashMap<>();
         queryParameters.put(AuthConstants.PRODUCT_ID, deviceConfig.getProductId());
         queryParameters.put(AuthConstants.DSN, deviceConfig.getDsn());
 
@@ -173,7 +173,7 @@ public class CompanionServiceClient {
      *             If an I/O exception occurs.
      */
     public OAuth2AccessToken getAccessToken(String sessionId) throws IOException {
-        Map<String, String> queryParameters = new HashMap<String, String>();
+        Map<String, String> queryParameters = new HashMap<>();
         queryParameters.put(AuthConstants.SESSION_ID, sessionId);
 
         JsonObject response = callService("/provision/accessToken", queryParameters);
@@ -182,6 +182,15 @@ public class CompanionServiceClient {
         int expiresIn = response.getInt(AuthConstants.OAuth2.EXPIRES_IN, -1);
 
         return new OAuth2AccessToken(accessToken, expiresIn);
+    }
+
+    public boolean revokeAccessToken(String sessionId) throws IOException {
+        Map<String, String> queryParameters = new HashMap<>();
+        queryParameters.put(AuthConstants.SESSION_ID, sessionId);
+
+        JsonObject response = callService("/provision/revokeToken", queryParameters);
+
+        return response.getBoolean(AuthConstants.LOGOUT_SUCCESS, false);
     }
 
     JsonObject callService(String path, Map<String, String> parameters) throws IOException {

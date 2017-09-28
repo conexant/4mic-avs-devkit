@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.amazon.alexa.avs</groupId>
   <artifactId>sample-java-client</artifactId>
-  <version>20160207.3</version>
+  <version>20160207.5</version>
   <name>Alexa Voice Service Sample Java Client</name>
   <url>https://developer.amazon.com/appsandservices/solutions/alexa/alexa-voice-service</url>
 

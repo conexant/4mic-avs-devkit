@@ -67,38 +67,54 @@ public class AuthSetup implements AccessTokenListener {
             final CompanionAppProvisioningServer registrationServer =
                     new CompanionAppProvisioningServer(authManager, deviceConfig);
 
-            Thread provisioningThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        registrationServer.startServer();
-                    } catch (Exception e) {
-                        log.error("Failed to start companion app provisioning server", e);
-                    }
+            Runnable provisioningTask = () -> {
+                try {
+                    registrationServer.startServer();
+                } catch (Exception e) {
+                    log.error("Failed to start companion app provisioning server", e);
                 }
             };
-            provisioningThread.start();
+            new Thread(provisioningTask).start();
         } else if (deviceConfig.getProvisioningMethod() == ProvisioningMethod.COMPANION_SERVICE) {
             CompanionServiceClient remoteProvisioningClient =
                     new CompanionServiceClient(deviceConfig);
             final CompanionServiceAuthManager authManager = new CompanionServiceAuthManager(
                     deviceConfig, remoteProvisioningClient, regCodeDisplayHandler, this);
 
-            Thread provisioningThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        authManager.startRemoteProvisioning();
-                    } catch (Exception e) {
-                        if (e.getMessage().startsWith("InvalidSessionId")) {
-                            log.error(
-                                    "Could not authenticate. Did you sign into Amazon before clicking ok?");
-                        }
-                        log.error("Failed to start companion service client", e);
+            Runnable provisioningTask = () -> {
+                try {
+                    authManager.startRemoteProvisioning();
+                } catch (Exception e) {
+                    if (e.getMessage() != null && e.getMessage().startsWith("InvalidSessionId")) {
+                        log.error("Could not authenticate. Did you sign into Amazon before "
+                                + "proceeding?");
                     }
+                    log.error("Failed to start companion service client", e);
                 }
             };
-            provisioningThread.start();
+            new Thread(provisioningTask).start();
+        }
+    }
+
+    public void startLogoutThread(RegCodeDisplayHandler regCodeDisplayHandler) {
+        if (deviceConfig.getProvisioningMethod() == ProvisioningMethod.COMPANION_SERVICE) {
+            CompanionServiceClient remoteProvisioningClient =
+                    new CompanionServiceClient(deviceConfig);
+            final CompanionServiceAuthManager authManager = new CompanionServiceAuthManager(
+                    deviceConfig, remoteProvisioningClient, regCodeDisplayHandler, this);
+
+            Runnable logoutTask = () -> {
+                try {
+                    authManager.revokeToken();
+                } catch (Exception e) {
+                    if (e.getMessage().startsWith("InvalidSessionId")) {
+                        log.error(
+                                "Could not logout. Were you logged in?");
+                    }
+                    log.error("Failed to start companion service client", e);
+                }
+            };
+            new Thread(logoutTask).start();
         }
     }
 
@@ -107,5 +123,12 @@ public class AuthSetup implements AccessTokenListener {
         accessTokenListeners
                 .stream()
                 .forEach(listener -> listener.onAccessTokenReceived(accessToken));
+    }
+
+    @Override
+    public void onAccessTokenRevoked() {
+        accessTokenListeners
+                .stream()
+                .forEach(listener -> listener.onAccessTokenRevoked());
     }
 }

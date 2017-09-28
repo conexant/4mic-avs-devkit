@@ -1,13 +1,13 @@
-/** 
+/**
  * Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- * Licensed under the Amazon Software License (the "License"). You may not use this file 
+ * Licensed under the Amazon Software License (the "License"). You may not use this file
  * except in compliance with the License. A copy of the License is located at
  *
  *   http://aws.amazon.com/asl/
  *
- * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the 
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
 package com.amazon.alexa.avs;
@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * The DirectiveEnqueuer takes parts parsed from a multipart parser, combines directves with their
@@ -48,14 +50,21 @@ public class DirectiveEnqueuer implements MultipartParserConsumer {
     // content to be associated with it.
     private final Queue<Directive> incompleteDirectiveQueue;
 
+    // For directives that should bypass the queues
+    private final DirectiveDispatcher dispatcher;
+
     // Map of all attachments which have not yet been matched with directives.
     private final Map<String, InputStream> attachments;
 
+    private ExecutorService executor = Executors.newCachedThreadPool();
+
     public DirectiveEnqueuer(DialogRequestIdAuthority dialogRequestIdAuthority,
-            Queue<Directive> dependentQueue, Queue<Directive> independentQueue) {
+            Queue<Directive> dependentQueue, Queue<Directive> independentQueue,
+            DirectiveDispatcher dispatcher) {
         this.dialogRequestIdAuthority = dialogRequestIdAuthority;
         this.dependentQueue = dependentQueue;
         this.independentQueue = independentQueue;
+        this.dispatcher = dispatcher;
         incompleteDirectiveQueue = new LinkedList<>();
         attachments = new HashMap<>();
     }
@@ -67,8 +76,7 @@ public class DirectiveEnqueuer implements MultipartParserConsumer {
     }
 
     @Override
-    public synchronized void onDirectiveAttachment(String contentId,
-            InputStream attachmentContent) {
+    public synchronized void onDirectiveAttachment(String contentId, InputStream attachmentContent) {
         attachments.put(contentId, attachmentContent);
         matchAttachementsWithDirectives();
     }
@@ -115,10 +123,23 @@ public class DirectiveEnqueuer implements MultipartParserConsumer {
 
     private void enqueueDirective(Directive directive) {
         String dialogRequestId = directive.getDialogRequestId();
-        if (dialogRequestId == null) {
+        if (shouldBypassQueue(dialogRequestId, directive)) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    dispatcher.dispatch(directive);
+                }
+            });
+        } else if (dialogRequestId == null) {
             independentQueue.add(directive);
         } else if (dialogRequestIdAuthority.isCurrentDialogRequestId(dialogRequestId)) {
             dependentQueue.add(directive);
         }
+    }
+
+    private boolean shouldBypassQueue(String dialogRequestId, Directive directive) {
+        return directive.getNamespace().equals(AVSAPIConstants.TemplateRuntime.NAMESPACE)
+                && (dialogRequestId == null || dialogRequestIdAuthority
+                        .isCurrentDialogRequestId(dialogRequestId));
     }
 }

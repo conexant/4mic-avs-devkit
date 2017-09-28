@@ -18,6 +18,9 @@ import com.amazon.alexa.avs.auth.companionservice.CompanionServiceClient.RemoteS
 import com.amazon.alexa.avs.config.DeviceConfig;
 import com.amazon.alexa.avs.config.DeviceConfig.CompanionServiceInformation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
@@ -27,18 +30,13 @@ public class CompanionServiceAuthManager {
     /**
      * How long in seconds before trying again to exchange refreshToken for an accessToken.
      */
-    private static final int TOKEN_REFRESH_RETRY_INTERVAL_IN_S = 2;
-
+    private static final int COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS = 2;
+    private static final Logger log = LoggerFactory.getLogger(CompanionServiceAuthManager.class);
     private final DeviceConfig deviceConfig;
-
     private final CompanionServiceClient companionServiceClient;
-
     private final RegCodeDisplayHandler regCodeDisplayHandler;
-
     private final AccessTokenListener accessTokenListener;
-
     private final Timer refreshTimer;
-
     private OAuth2AccessToken token;
 
     public CompanionServiceAuthManager(DeviceConfig deviceConfig,
@@ -81,11 +79,10 @@ public class CompanionServiceAuthManager {
                 return regCodeResponse;
             } catch (IOException e) {
                 try {
-                    System.err
-                            .println("There was a problem connecting to the Companion Service. Trying again in "
-                                    + TOKEN_REFRESH_RETRY_INTERVAL_IN_S
+                    log.error("There was a problem connecting to the Companion Service. Trying again in "
+                                    + COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS
                                     + " seconds. Please make sure it is up and running.");
-                    Thread.sleep(TOKEN_REFRESH_RETRY_INTERVAL_IN_S * 1000);
+                    Thread.sleep(COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS * 1000);
                 } catch (InterruptedException ie) {
                 }
             }
@@ -109,11 +106,10 @@ public class CompanionServiceAuthManager {
                     break;
                 } catch (IOException e) {
                     try {
-                        System.err
-                                .println("There was a problem connecting to the Companion Service. Trying again in "
-                                        + TOKEN_REFRESH_RETRY_INTERVAL_IN_S
+                        log.error("There was a problem connecting to the Companion Service. Trying again in "
+                                        + COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS
                                         + " seconds. Please make sure it is up and running.");
-                        Thread.sleep(TOKEN_REFRESH_RETRY_INTERVAL_IN_S * 1000);
+                        Thread.sleep(COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS * 1000);
                     } catch (InterruptedException ie) {
                     }
                 }
@@ -124,6 +120,29 @@ public class CompanionServiceAuthManager {
     private void refreshTokens() {
         if (deviceConfig.getCompanionServiceInfo() != null) {
             requestAccessToken(deviceConfig.getCompanionServiceInfo().getSessionId());
+        }
+    }
+
+    public void revokeToken() {
+        if ((deviceConfig.getCompanionServiceInfo() != null) && (deviceConfig.getCompanionServiceInfo().getSessionId() != null)) {
+            while (true) {
+                try {
+                    if (companionServiceClient.revokeAccessToken(deviceConfig.getCompanionServiceInfo().getSessionId())) {
+                        accessTokenListener.onAccessTokenRevoked();
+                    } else {
+                        log.error("There was a problem deleting the tokens in the Companion Service.");
+                    }
+                    break;
+                } catch (IOException e) {
+                    try {
+                        log.error("There was a problem connecting to the Companion Service. Trying again in "
+                                        + COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS
+                                        + " seconds. Please make sure it is up and running.");
+                        Thread.sleep(COMPANION_SERVICE_RETRY_INTERVAL_IN_SECONDS * 1000);
+                    } catch (InterruptedException ie) {
+                    }
+                }
+            }
         }
     }
 

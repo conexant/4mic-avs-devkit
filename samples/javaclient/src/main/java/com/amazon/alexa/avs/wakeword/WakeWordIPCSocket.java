@@ -12,19 +12,15 @@
  */
 package com.amazon.alexa.avs.wakeword;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WakeWordIPCSocket extends WakeWordIPC implements Runnable {
 
@@ -68,9 +64,8 @@ public class WakeWordIPCSocket extends WakeWordIPC implements Runnable {
 
     public synchronized void unregisterClient(WakeWordIPCConnectedClient oldClient) {
         connectedClients.remove(oldClient);
-        log
-                .info("IPC client was removed, current of current clients is "
-                        + connectedClients.size());
+        log.info(
+                "IPC client was removed, current of current clients is " + connectedClients.size());
     }
 
     @Override

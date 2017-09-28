@@ -12,29 +12,29 @@
  */
 package com.amazon.alexa.avs.ui;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
+/**
+ * Factory providing prompts to the user telling them information or asking a Yes/No question.
+ */
+public interface DialogFactory {
 
-public class DialogFactory {
+    /**
+     * Tell the user some information. The user must acknowledge this information before continuing.
+     *
+     * @param title
+     *         Description of the type of message.
+     * @param message
+     *         Content of the message.
+     */
+    void showInformationalDialog(String title, String message);
 
-    private JFrame contentPane;
-
-    public DialogFactory(JFrame contentPane) {
-        this.contentPane = contentPane;
-    }
-
-    public void showInformationalDialog(String title, String message) {
-        JTextArea textMessage = new JTextArea(message);
-        textMessage.setEditable(false);
-        JOptionPane.showMessageDialog(contentPane, textMessage, title,
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public int showYesNoDialog(String title, String message) {
-        JTextArea textMessage = new JTextArea(message);
-        textMessage.setEditable(false);
-        return JOptionPane.showConfirmDialog(contentPane, textMessage, title,
-                JOptionPane.YES_NO_OPTION);
-    }
+    /**
+     * Ask the user a Yes/No question.
+     *
+     * @param title
+     *         Description of the type of message.
+     * @param message
+     *         Question text.
+     * @return 0 if the user pressed yes, 1 if the user pressed no. Matches JOptionPane results.
+     */
+    int showYesNoDialog(String title, String message);
 }

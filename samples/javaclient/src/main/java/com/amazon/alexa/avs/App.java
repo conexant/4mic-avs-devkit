@@ -13,33 +13,16 @@
 package com.amazon.alexa.avs;
 
 import com.amazon.alexa.avs.auth.AuthSetup;
-import com.amazon.alexa.avs.auth.companionservice.RegCodeDisplayHandler;
 import com.amazon.alexa.avs.config.DeviceConfig;
 import com.amazon.alexa.avs.config.DeviceConfigUtils;
 import com.amazon.alexa.avs.http.AVSClientFactory;
-import com.amazon.alexa.avs.ui.BearerTokenView;
-import com.amazon.alexa.avs.ui.DeviceNameView;
-import com.amazon.alexa.avs.ui.DialogFactory;
-import com.amazon.alexa.avs.ui.ListenView;
-import com.amazon.alexa.avs.ui.LocaleView;
-import com.amazon.alexa.avs.ui.MainWindow;
-import com.amazon.alexa.avs.ui.PlaybackControlsView;
-import com.amazon.alexa.avs.ui.UserSpeechVisualizerView;
+import com.amazon.alexa.avs.ui.graphical.GraphicalUI;
+import com.amazon.alexa.avs.ui.headless.HeadlessUI;
 import com.amazon.alexa.avs.wakeword.WakeWordIPCFactory;
-
-import javax.swing.SwingUtilities;
 
 public class App {
 
     private AVSController controller;
-    private AuthSetup authSetup;
-    private BearerTokenView bearerTokenView;
-    private DeviceNameView deviceNameView;
-    private LocaleView localeView;
-    private UserSpeechVisualizerView visualizerView;
-    private ListenView listenView;
-    private PlaybackControlsView playbackControlsView;
-    private MainWindow mainWindow;
 
     public static void main(String[] args) throws Exception {
         if (args.length == 1) {
@@ -58,50 +41,23 @@ public class App {
     }
 
     public App(DeviceConfig config) throws Exception {
-
-        authSetup = new AuthSetup(config);
+        AuthSetup authSetup = new AuthSetup(config);
         controller =
                 new AVSController(new AVSAudioPlayerFactory(), new AlertManagerFactory(),
                         getAVSClientFactory(config), DialogRequestIdAuthority.getInstance(),
                         new WakeWordIPCFactory(), config);
-        SwingUtilities.invokeAndWait(() -> createViews(config));
-        addListeners();
-        startAuthentication(config);
-        start();
+        if (config.getHeadlessModeEnabled()) {
+            new HeadlessUI(controller, authSetup, config);
+        } else {
+            new GraphicalUI(controller, authSetup, config);
+        }
     }
 
     protected AVSClientFactory getAVSClientFactory(DeviceConfig config) {
         return new AVSClientFactory(config);
     }
 
-    private void startAuthentication(DeviceConfig config) {
-        RegCodeDisplayHandler regCodeDisplayHandler =
-                new RegCodeDisplayHandler(new DialogFactory(mainWindow), config);
-        authSetup.startProvisioningThread(regCodeDisplayHandler);
-    }
-
-    private void createViews(DeviceConfig config) {
-        bearerTokenView = new BearerTokenView(authSetup, controller);
-        deviceNameView = new DeviceNameView(config.getProductId(), config.getDsn());
-        localeView = new LocaleView(config, controller);
-        visualizerView = new UserSpeechVisualizerView();
-        listenView = new ListenView(visualizerView, controller);
-        playbackControlsView = new PlaybackControlsView(visualizerView, controller);
-
-        mainWindow = new MainWindow(deviceNameView, localeView, bearerTokenView,
-                visualizerView, listenView, playbackControlsView);
-    }
-
-    private void addListeners() {
-        listenView.addSpeechStateChangeListener(visualizerView);
-        listenView.addSpeechStateChangeListener(playbackControlsView);
-        authSetup.addAccessTokenListener(bearerTokenView);
-        authSetup.addAccessTokenListener(controller);
-    }
-
-    private void start() {
-        controller.init(listenView);
-        controller.startHandlingDirectives();
-        SwingUtilities.invokeLater(() -> mainWindow.setVisible(true));
+    protected AVSController getController() {
+        return controller;
     }
 }

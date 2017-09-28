@@ -20,4 +20,6 @@ public interface AccessTokenListener {
      * @param accessToken
      */
     void onAccessTokenReceived(String accessToken);
+
+    void onAccessTokenRevoked();
 }

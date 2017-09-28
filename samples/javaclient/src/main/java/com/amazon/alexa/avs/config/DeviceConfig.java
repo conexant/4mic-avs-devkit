@@ -47,6 +47,7 @@ public class DeviceConfig {
     public static final String AVS_HOST = "avsHost";
     public static final String WAKE_WORD_AGENT_ENABLED = "wakeWordAgentEnabled";
     public static final String LOCALE = "locale";
+    public static final String HEADLESS = "headless";
 
     /*
      * Required parameters from the config file.
@@ -63,6 +64,7 @@ public class DeviceConfig {
     private CompanionAppInformation companionAppInfo;
     private CompanionServiceInformation companionServiceInfo;
     private boolean wakeWordAgentEnabled;
+    private boolean headlessModeEnabled;
 
     @SuppressWarnings("javadoc")
     public enum ProvisioningMethod {
@@ -102,6 +104,8 @@ public class DeviceConfig {
      *            {@value #COMPANION_SERVICE}
      * @param wakeWordAgentEnabled
      *            Whether the wake word agent functionality is enabled.
+     * @param headlessModeEnabled
+     *            Whether to launch the app in the terminal or as a GUI application.
      * @param languageTag
      *            The language tag representing the locale to initialize the app with.
      * @param companionAppInfo
@@ -112,7 +116,7 @@ public class DeviceConfig {
      *            (optional) AVS host override
      */
     public DeviceConfig(String productId, String dsn, String provisioningMethod,
-            boolean wakeWordAgentEnabled, String languageTag,
+            boolean wakeWordAgentEnabled, boolean headlessModeEnabled, String languageTag,
             CompanionAppInformation companionAppInfo,
             CompanionServiceInformation companionServiceInfo, String avsHost) {
 
@@ -171,14 +175,15 @@ public class DeviceConfig {
         }
 
         this.wakeWordAgentEnabled = wakeWordAgentEnabled;
+        this.headlessModeEnabled = headlessModeEnabled;
     }
 
     public DeviceConfig(String productId, String dsn, String provisioningMethod,
-            boolean wakeWordAgentEnabled, String languageTag,
+            boolean wakeWordAgentEnabled, boolean headlessModeEnabled, String languageTag,
             CompanionAppInformation companionAppInfo,
             CompanionServiceInformation companionServiceInfo) {
-        this(productId, dsn, provisioningMethod, wakeWordAgentEnabled, languageTag,
-                companionAppInfo, companionServiceInfo, DEFAULT_HOST);
+        this(productId, dsn, provisioningMethod, wakeWordAgentEnabled, headlessModeEnabled,
+                languageTag, companionAppInfo, companionServiceInfo, DEFAULT_HOST);
     }
 
     /**
@@ -233,6 +238,13 @@ public class DeviceConfig {
      */
     public boolean getWakeWordAgentEnabled() {
         return wakeWordAgentEnabled;
+    }
+
+    /**
+     * @return headlessModeEnabled.
+     */
+    public boolean getHeadlessModeEnabled() {
+        return headlessModeEnabled;
     }
 
     /**
@@ -306,6 +318,7 @@ public class DeviceConfig {
                 .add(DSN, dsn)
                 .add(PROVISIONING_METHOD, provisioningMethod.toString())
                 .add(WAKE_WORD_AGENT_ENABLED, wakeWordAgentEnabled)
+                .add(HEADLESS, headlessModeEnabled)
                 .add(LOCALE, locale.toLanguageTag())
                 .add(AVS_HOST, avsHost.toString());
 

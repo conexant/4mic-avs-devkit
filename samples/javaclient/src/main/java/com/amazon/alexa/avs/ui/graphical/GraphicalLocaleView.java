@@ -10,7 +10,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package com.amazon.alexa.avs.ui;
+package com.amazon.alexa.avs.ui.graphical;
+
+import com.amazon.alexa.avs.AVSController;
+import com.amazon.alexa.avs.config.DeviceConfig;
 
 import java.awt.FlowLayout;
 import java.util.Locale;
@@ -19,32 +22,34 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.amazon.alexa.avs.AVSController;
-import com.amazon.alexa.avs.config.DeviceConfig;
-import com.amazon.alexa.avs.config.DeviceConfigUtils;
+import com.amazon.alexa.avs.ui.LocaleUIHandler;
+import com.amazon.alexa.avs.ui.controllers.LocaleViewController;
 
-public class LocaleView extends JPanel {
+public class GraphicalLocaleView extends JPanel implements LocaleUIHandler {
 
     private static final String LOCALE_LABEL = "Locale:";
     private static final String LOCALE_NAME = "Locale";
 
-    private DeviceConfig deviceConfig;
+    private LocaleViewController localeViewController;
 
-    public LocaleView(DeviceConfig config, AVSController controller) {
+    GraphicalLocaleView(DeviceConfig config, AVSController controller) {
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        this.deviceConfig = config;
+        localeViewController = new LocaleViewController(config, controller);
         JLabel localeLabel = new JLabel(LOCALE_LABEL);
         this.add(localeLabel);
         localeLabel.setName(LOCALE_NAME);
         JComboBox<Object> localeSelector =
-                new JComboBox<>(deviceConfig.getSupportedLocalesLanguageTag().toArray());
-        localeSelector.setSelectedItem(deviceConfig.getLocale().toLanguageTag());
+                new JComboBox<>(config.getSupportedLocalesLanguageTag().toArray());
+        localeSelector.setSelectedItem(config.getLocale().toLanguageTag());
         localeSelector.addActionListener(e -> {
             Locale locale = Locale.forLanguageTag(localeSelector.getSelectedItem().toString());
-            deviceConfig.setLocale(locale);
-            DeviceConfigUtils.updateConfigFile(deviceConfig);
-            controller.setLocale(locale);
+            handleLocaleChange(locale);
         });
         this.add(localeSelector);
+    }
+
+    @Override
+    public void handleLocaleChange(Locale locale) {
+        localeViewController.handleLocaleChange(locale);
     }
 }

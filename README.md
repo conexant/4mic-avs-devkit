@@ -4,10 +4,6 @@
 
 This project provides a step-by-step walkthrough to help you build a **hands-free** [Alexa Voice Service](https://developer.amazon.com/avs) (AVS) prototype in 60 minutes, using wake word engines from [Sensory](https://github.com/Sensory/alexa-rpi) or [KITT.AI](https://github.com/Kitt-AI/snowboy). Now, in addition to pushing a button to "start listening", you can now also just say the wake word "Alexa", much like the [Amazon Echo](https://amazon.com/echo). You can find step-by-step instructions to set up the hands-free prototype with the Conexant AudioSmart 4-mic Development Kit for Amazon AVS [RPi2 + Conexant 4-mic](../../wiki/Conexant4Mic-Raspberry-Pi).
 
-*NEW!* - [Click here](../../wiki/Conexant4Mic-Raspberry-Pi) for instructions to build the AVS Prototype using a Raspberry Pi and the Conexant 4-Mic Development Kit for Amazon AVS
-
-[Click here](https://github.com/alexa/alexa-avs-sample-app/wiki/Conexant2Mic-Raspberry-Pi) for instructions to build the AVS Prototype using a Raspberry Pi and the Conexant 2-Mic Development Kit for Amazon AVS
-
 ---
 
 ## What is AVS?
@@ -16,7 +12,47 @@ This project provides a step-by-step walkthrough to help you build a **hands-fre
 
 ---
 
-## What's new?
+## Get started
+
+You can set up this project on the following platforms -
+
+* *NEW* [Raspberry Pi + Conexant 4-Mic Development Kit for Amazon AVS](../../wiki/Conexant4Mic-Raspberry-Pi), or
+* [Raspberry Pi + Conexant 2-Mic Development Kit for Amazon AVS](https://github.com/alexa/alexa-avs-sample-app/wiki/Conexant2Mic-Raspberry-Pi)
+
+---
+
+## What's new?  
+
+**July 6, 2017:**
+
+*Updates*
+
+* The sample app has been updated to support Notifications.
+  * Enable the [Quote Maker](https://www.amazon.com/dp/B071ZMZWF7/ref=sr_1_1?s=digital-skills&ie=UTF8&qid=1499374636&sr=1-1&keywords=quote+maker) skill, located in the Alexa Skills Store to test Notifications with the AVS Sample App.
+* Added a login/logout button.
+
+**June 21, 2017:**  
+
+*Updates*
+
+* The sample app now supports Display Cards.  
+  * `TemplateRuntime` directives will be displayed in the sample app as JSON.   
+  * To enable Display Cards:  
+    * Login to the [Amazon Developer Portal](https://developer.amazon.com/login.html) and navigate to your product: **Alexa > AVS**.
+    * Click **Edit**, then click **Device Capabilities**.  
+    * Select **Display Cards**, then select **Display Cards with Media**.  
+
+**May 4, 2017:**  
+
+*Updates*
+
+* The Conexant 4-mic Development Kit for Amazon AVS is now available, making it easier and more cost-effective to build far-field products with Amazon Alexa. [Learn more »](http://developer.amazon.com/alexa-voice-service/dev-kits/conexant-4-mic/)  
+
+**April 27, 2017:**
+
+*Updates*
+
+* Need help troubleshooting the AVS Sample App? Check out the new [Troubleshooting Guide](https://github.com/alexa/alexa-avs-sample-app/wiki/Troubleshooting).
 
 **May 4th, 2017:**  
 
@@ -42,7 +78,7 @@ This project provides a step-by-step walkthrough to help you build a **hands-fre
 
 *Known Issues*
 
-* To log out of the java sample app follow these instructions: [Click here for log out instructions]((../../wiki/Sample-App-Log-Out-Instructions).
+* To log out of the java sample app you must delete your `refresh_tokens` file in the `/samples/companionService` folder. Otherwise, the sample app will authenticate on each reboot. [Click here for log out instructions](../../wiki/Sample-App-Log-Out-Instructions).
 
 ---
 
@@ -60,17 +96,9 @@ This project provides a step-by-step walkthrough to help you build a **hands-fre
 
 ---
 
-## Get started
-
-You can set up this project on the following platforms. Please choose the platform you'd like to set this up on -
-
-* *NEW* [Raspberry Pi + Conexant 4-Mic Development Kit for Amazon AVS](../../wiki/Conexant4Mic-Raspberry-Pi), or
-* [Raspberry Pi + Conexant 2-Mic Development Kit for Amazon AVS](https://github.com/alexa/alexa-avs-sample-app/wiki/Conexant2Mic-Raspberry-Pi)
-
----
-
 ## Contribute 
 
-* Want to report a bug or request an update to the documentation? See [CONTRIBUTING.md](https://github.com/alexa/alexa-avs-sample-app/blob/master/CONTRIBUTING.md).  
+* Want to report a bug or request an update to the documentation? See [CONTRIBUTING.md](https://github.com/alexa/alexa-avs-sample-app/blob/master/CONTRIBUTING.md).
+* Having trouble? Check out our [troubleshooting guide](../../wiki/Troubleshooting).
 * Have questions or need help building the sample app? Open a [new issue](https://github.com/conexant/alexa-avs-sample-app/issues/new).
 

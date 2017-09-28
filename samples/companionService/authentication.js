@@ -175,7 +175,7 @@ auth.getAccessToken = function(sessionId, callback) {
 
     var refreshToken = refreshTokenStorage.get(sessionId);
 
-    if (refreshToken === null) {
+    if ((refreshToken === null) || (refreshToken === undefined) || (refreshToken === "")) {
         if (sessionIds.indexOf(sessionId) == -1 || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(sessionId)) {
             callback(error('InvalidSessionId', 'The provided sessionId was invalid.', 401));
             return;
@@ -228,6 +228,31 @@ auth.getAccessToken = function(sessionId, callback) {
 
     req.write(reqGrant);
     req.end();
+};
+
+/**
+ * Revokes token associated with the sessionId.
+ *
+ * @param sessionId The sessionId for this device.
+ * @param callback The callback(err, json) to return data to the user.
+ */
+auth.revokeToken = function(sessionId, callback) {
+    var missingProperties = [];
+    if (!sessionId) {
+        missingProperties.push("sessionId");
+    }
+
+    if (missingProperties.length > 0) {
+        callback(error("MissingParams", "The following parameters were missing or empty strings: " + missingProperties.join(", "), 400));
+        return;
+    }
+
+    refreshTokenStorage.remove(sessionId);
+
+    var reply = {
+        logoutSuccess: true
+     };
+    callback(null, reply);
 };
 
 /**

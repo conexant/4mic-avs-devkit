@@ -29,6 +29,7 @@ public class AuthConstants {
     public static final String PRODUCT_ID = "productId";
 
     public static final String REG_CODE = "regCode";
+    public static final String LOGOUT_SUCCESS = "logoutSuccess";
 
     // ERRORS
     public static final String ERROR = "error";
